@@ -5,13 +5,18 @@ function geocode(place, callback) {
     place
   )}.json?access_token=pk.eyJ1IjoiZHp1bmduZ3V5ZW4iLCJhIjoiY2tnMjJmeTNwMDVibTJxbzF6aTh2aXpnOSJ9.SgV4_8znoolkhhLCwbXRTw&limit=1`;
   const req = https.request(url, (res) => {
-    res.on("data", (d) => {
-      const data = JSON.parse(d.toString()).features[0];
-      if (!data) {
+    let data = "";
+    res.on("data", (chunk) => {
+      data += chunk;
+    });
+
+    res.on("end", () => {
+      const dataObj = JSON.parse(data).features[0];
+      if (!dataObj) {
         callback("Invalid location. Please try again.");
       } else {
-        const [longitude, latitude] = data.center;
-        const { place_name } = data;
+        const [longitude, latitude] = dataObj.center;
+        const { place_name } = dataObj;
         callback(null, { latitude, longitude, place_name });
       }
     });
